@@ -1,0 +1,40 @@
+name: OpenCode PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    # kalau belum punya self-hosted, ganti sementara:
+    # runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+
+      - name: Checkout OpenCode Engine
+        uses: actions/checkout@v4
+        with:
+          repository: radiansyah-dev74/opencode-review-engine
+          path: opencode-engine
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install engine deps
+        working-directory: opencode-engine
+        run: |
+          npm install
+          npm run build || true
+
+      - name: Run OpenCode GitHub review
+        working-directory: opencode-engine
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODEL: opencode/default
+        run: |
+          node packages/opencode/dist/cli/cmd/github.js run
