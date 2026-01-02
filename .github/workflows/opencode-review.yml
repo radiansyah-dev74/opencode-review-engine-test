@@ -1,32 +1,39 @@
-name: OpenCode PR Review
+name: OpenCode PR Review (FORCED)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   review:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
 
     steps:
       # 1️⃣ Checkout PR code (repo yang sedang direview)
       - name: Checkout PR code
         uses: actions/checkout@v4
 
-      # 2️⃣ Checkout OpenCode engine
+      # 2️⃣ Checkout OpenCode engine (ENGINE YANG KAMU MODIF)
       - name: Checkout OpenCode Engine
         uses: actions/checkout@v4
         with:
           repository: radiansyah-dev74/opencode-review-engine
+          ref: dev
           path: opencode-engine
 
-      # 3️⃣ Setup Node (dibutuhkan sebagian tooling)
+      # 3️⃣ Setup Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 4️⃣ Setup Bun (WAJIB untuk OpenCode)
+      # 4️⃣ Setup Bun
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
@@ -38,10 +45,20 @@ jobs:
         run: |
           bun install
 
-      # 6️⃣ Run OpenCode GitHub PR Review (ENTRYPOINT BENAR)
+      # 6️⃣ DEBUG — tampilkan env penting
+      - name: Debug Environment
+        run: |
+          echo "REPO=$GITHUB_REPOSITORY"
+          echo "PR=${{ github.event.pull_request.number }}"
+          echo "MODEL=$MODEL"
+          echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY != '' }}"
+
+      # 7️⃣ RUN OPENCODE (COMMAND YANG BENAR)
       - name: Run OpenCode GitHub PR Review
         working-directory: opencode-engine
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENCODE_LOG_LEVEL: debug
         run: |
-          bun packages/opencode/src/cli/cmd/github.ts pr review
+          bun packages/opencode/src/cli/cmd/github.ts run
