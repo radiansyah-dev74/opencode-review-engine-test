@@ -7,38 +7,41 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
-    # kalau belum punya self-hosted, ganti sementara:
-    # runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout PR code (repo yang sedang direview)
       - name: Checkout PR code
         uses: actions/checkout@v4
 
+      # 2️⃣ Checkout OpenCode Engine
       - name: Checkout OpenCode Engine
         uses: actions/checkout@v4
         with:
           repository: radiansyah-dev74/opencode-review-engine
           path: opencode-engine
 
+      # 3️⃣ Setup Node (dibutuhkan oleh sebagian tooling)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 4️⃣ Setup Bun (WAJIB untuk OpenCode)
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-        bun-version: latest
+          bun-version: latest
 
-    - name: Install engine deps
-      working-directory: opencode-engine
-      run: |
-        bun install
-                                   
-      - name: Run OpenCode GitHub review
+      # 5️⃣ Install OpenCode dependencies
+      - name: Install OpenCode dependencies
+        working-directory: opencode-engine
+        run: |
+          bun install
+
+      # 6️⃣ Run OpenCode GitHub PR Review
+      - name: Run OpenCode GitHub PR Review
         working-directory: opencode-engine
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MODEL: opencode/default
         run: |
-          node packages/opencode/dist/cli/cmd/github.js run
+          bun run opencode github pr review
