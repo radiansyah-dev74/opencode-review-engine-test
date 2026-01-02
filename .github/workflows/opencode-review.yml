@@ -13,14 +13,14 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v4
 
-      # 2️⃣ Checkout OpenCode Engine
+      # 2️⃣ Checkout OpenCode engine
       - name: Checkout OpenCode Engine
         uses: actions/checkout@v4
         with:
           repository: radiansyah-dev74/opencode-review-engine
           path: opencode-engine
 
-      # 3️⃣ Setup Node (dibutuhkan oleh sebagian tooling)
+      # 3️⃣ Setup Node (dibutuhkan sebagian tooling)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -38,10 +38,10 @@ jobs:
         run: |
           bun install
 
-      # 6️⃣ Run OpenCode GitHub PR Review
+      # 6️⃣ Run OpenCode GitHub PR Review (ENTRYPOINT BENAR)
       - name: Run OpenCode GitHub PR Review
         working-directory: opencode-engine
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          bun run opencode github pr review
+          bun packages/opencode/src/cli/cmd/github.ts pr review
