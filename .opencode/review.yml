@@ -1,0 +1,9 @@
+version: 1
+
+review:
+  summary: true
+  comments: true
+
+rules:
+  - name: general-code-quality
+    description: Review code quality, clarity, and obvious issues
