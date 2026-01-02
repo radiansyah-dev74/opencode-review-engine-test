@@ -25,12 +25,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install engine deps
-        working-directory: opencode-engine
-        run: |
-          npm install
-          npm run build || true
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+        bun-version: latest
 
+    - name: Install engine deps
+      working-directory: opencode-engine
+      run: |
+        bun install
+                                   
       - name: Run OpenCode GitHub review
         working-directory: opencode-engine
         env:
