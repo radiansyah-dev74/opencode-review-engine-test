@@ -1,0 +1,87 @@
+version: 1
+
+review:
+  # Selalu buat ringkasan di PR
+  summary: true
+
+  # Selalu buat inline comments
+  comments: true
+
+  # PAKSA komentar walaupun tidak ada issue serius
+  always_comment: true
+
+  # Mode agresif (testing)
+  severity: aggressive
+
+  # Batasi supaya tidak spam berlebihan
+  max_comments: 50
+
+context:
+  # Review seluruh perubahan di PR
+  scope: pull_request
+
+  # Jangan abaikan file apa pun (testing)
+  include:
+    - "**/*"
+
+  # Abaikan file ini jika ada
+  exclude:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+
+rules:
+  - name: general-code-quality
+    description: |
+      Review code quality aggressively.
+      Always comment on:
+      - unclear naming
+      - unused variables
+      - dead code
+      - console.log / debug prints
+      - empty blocks
+      - magic numbers
+      - deeply nested logic
+      - inconsistent formatting
+
+  - name: readability
+    description: |
+      Ensure the code is readable and maintainable.
+      Comment on:
+      - long functions
+      - unclear intent
+      - missing comments
+      - confusing control flow
+
+  - name: maintainability
+    description: |
+      Identify maintainability issues.
+      Comment on:
+      - duplicated logic
+      - poor structure
+      - lack of separation of concerns
+
+  - name: best-practices
+    description: |
+      Enforce general best practices.
+      Comment on:
+      - bad naming conventions
+      - unnecessary complexity
+      - avoidable performance issues
+
+output:
+  # Format komentar di GitHub
+  github:
+    summary_title: "🤖 OpenCode Review Summary"
+    comment_prefix: "⚠️ OpenCode:"
+    inline_comment_prefix: "💬 OpenCode:"
+
+behavior:
+  # Jangan diam walau confidence rendah
+  comment_when_uncertain: true
+
+  # Lebih baik false positive daripada silent
+  prefer_comment_over_silence: true
+
+  # Jangan fail CI walaupun review jelek
+  fail_on_critical: false

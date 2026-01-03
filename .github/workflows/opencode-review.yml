@@ -1,0 +1,70 @@
+name: OpenCode PR Review (FORCED)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # 1️⃣ Checkout PR repo (repo yang sedang direview)
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Checkout OpenCode Engine (PAKAI BRANCH DEBUG)
+      - name: Checkout OpenCode Engine
+        uses: actions/checkout@v4
+        with:
+          repository: radiansyah-dev74/opencode-review-engine
+          ref: debug/github-pr-review
+          path: opencode-engine
+
+      # 3️⃣ Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 4️⃣ Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # 5️⃣ Install OpenCode dependencies
+      - name: Install OpenCode dependencies
+        working-directory: opencode-engine
+        run: |
+          bun install
+
+      # 6️⃣ Debug ENV (BUKTI KEY MASUK)
+      - name: Debug ENV
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          MODEL: openrouter/openai/gpt-4o-mini
+        run: |
+          echo "MODEL=$MODEL"
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo "❌ OPENROUTER_API_KEY MISSING"
+            exit 1
+          else
+            echo "✅ OPENROUTER_API_KEY PRESENT"
+          fi
+
+      # 7️⃣ Run OpenCode GitHub PR Review
+      - name: Run OpenCode GitHub PR Review
+        working-directory: opencode-engine
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          MODEL: openrouter/openai/gpt-4o-mini
+          OPENCODE_LOG_LEVEL: debug
+        run: |
+          bun packages/opencode/src/cli/cmd/github.ts run
